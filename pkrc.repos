@@ -1,0 +1,13 @@
+repositories:
+  sonar_3d_reconstruction:
+    type: git
+    url: https://github.com/HERO-Lab-POSTECH/sonar_3d_reconstruction.git
+    version: main
+  sensor_packages:
+    type: git
+    url: https://github.com/HERO-Lab-POSTECH/sensor_packages.git
+    version: main
+  lidar_slam:
+    type: git
+    url: https://github.com/HERO-Lab-POSTECH/lidar_slam.git
+    version: main

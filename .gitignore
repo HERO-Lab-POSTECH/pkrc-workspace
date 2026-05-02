@@ -1,0 +1,19 @@
+# vcstool이 채우는 패키지 소스
+src/
+
+# colcon 산출물
+build/
+install/
+log/
+
+# 환경
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# 에디터
+.vscode/
+.idea/
+*.swp
+.DS_Store
