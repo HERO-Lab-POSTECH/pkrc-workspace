@@ -11,3 +11,7 @@ repositories:
     type: git
     url: https://github.com/HERO-Lab-POSTECH/lidar_slam.git
     version: main
+  pkrc_visualizer:
+    type: git
+    url: https://github.com/HERO-Lab-POSTECH/pkrc_visualizer.git
+    version: main
