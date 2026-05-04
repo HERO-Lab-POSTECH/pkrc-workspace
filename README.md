@@ -1,7 +1,7 @@
 # pkrc-workspace
 
 PKRC 수중 3D 재구성 프로젝트의 ROS2 워크스페이스 부트스트랩.
-세 개의 패키지 리포(`sonar_3d_reconstruction`, `sensor_packages`, `lidar_slam`)를 한 번에 clone·빌드·동기화합니다.
+네 개의 패키지 리포(`sonar_3d_reconstruction`, `sensor_packages`, `lidar_slam`, `pkrc_visualizer`)를 한 번에 clone·빌드·동기화합니다.
 
 ## 빠른 시작
 
@@ -57,6 +57,7 @@ pkrc-workspace/
 | [sonar_3d_reconstruction](https://github.com/HERO-Lab-POSTECH/sonar_3d_reconstruction) | 3D 확률 매핑, ROV 검출 |
 | [sensor_packages](https://github.com/HERO-Lab-POSTECH/sensor_packages) | 센서 드라이버, 메시지 타입 |
 | [lidar_slam](https://github.com/HERO-Lab-POSTECH/lidar_slam) | Fast-LIO, Cartographer 2D SLAM |
+| [pkrc_visualizer](https://github.com/HERO-Lab-POSTECH/pkrc_visualizer) | PyQt5 통합 시각화 (SLAM·Pose·Sonar Map·Image) |
 
 ## 라이선스
 
