@@ -34,7 +34,10 @@ command -v rosdep     >/dev/null || fail "rosdep not found. Install: sudo apt in
 info "  ROS2 humble, vcstool, colcon, rosdep OK"
 
 # shellcheck disable=SC1091
+# ROS humble setup.bash uses [ -n "$AMENT_TRACE_SETUP_FILES" ] which fails under `set -u`.
+set +u
 source /opt/ros/humble/setup.bash
+set -u
 
 info "Step 2/4: Import packages via vcstool"
 mkdir -p src
