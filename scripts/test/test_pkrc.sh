@@ -105,6 +105,35 @@ PATH="$MOCK_BIN:$PATH" "$WS_ROOT/scripts/pkrc_record.sh" >/dev/null 2>&1
 rc=$?
 [[ $rc -ne 0 ]] && pass "label 인자 없으면 exit non-zero (rc=$rc)" || fail "label 없는데 0으로 exit"
 
+# ─── Task 4: pkrc_replay.sh smoke test ──────────────────────
+echo "== pkrc_replay.sh smoke =="
+
+# Task 3에서 만든 ${today}_beta_test recording 재사용
+out=$(PATH="$MOCK_BIN:$PATH" "$WS_ROOT/scripts/pkrc_replay.sh" \
+        "${today}_beta_test" --label voxel0p3 2>&1)
+
+echo "$out" | grep -q "📁 New run:.*_voxel0p3" \
+  && pass "replay stdout: New run 경로 + label" || fail "replay stdout 형식 — got: $out"
+echo "$out" | grep -q "export PKRC_MAP_DIR=" \
+  && pass "replay stdout: export PKRC_MAP_DIR 라인" || fail "replay export 라인 누락"
+echo "$out" | grep -q "MOCK_ROS2: bag play.*${today}_beta_test/bag" \
+  && pass "replay가 ros2 bag play <bag_dir> 호출" || fail "ros2 bag play 호출 누락 — out: $out"
+
+# latest 심볼릭 링크가 새 run으로 갱신
+new_latest=$(readlink "$TEST_ROOT/recordings/${today}_beta_test/runs/latest")
+[[ "$new_latest" == *_voxel0p3 ]] \
+  && pass "replay가 latest 심볼릭 링크 갱신" || fail "latest 갱신 안 됨 — got: $new_latest"
+
+# 존재하지 않는 bag-id → non-zero exit
+PATH="$MOCK_BIN:$PATH" "$WS_ROOT/scripts/pkrc_replay.sh" no_such_bag >/dev/null 2>&1
+rc=$?
+[[ $rc -ne 0 ]] && pass "존재하지 않는 bag-id → non-zero exit (rc=$rc)" || fail "존재 안 하는 bag-id인데 0으로 exit"
+
+# label 없이 실행 시 기본 라벨 'replay' 사용 — New run 라인의 끝이 _replay여야 함
+out=$(PATH="$MOCK_BIN:$PATH" "$WS_ROOT/scripts/pkrc_replay.sh" "${today}_beta_test" 2>&1)
+echo "$out" | grep -qE "New run:.*_replay$" \
+  && pass "label 미지정 시 기본값 'replay' 적용" || fail "기본 label 적용 안 됨 — got: $out"
+
 # ─── 결과 ────────────────────────────────────────────────────
 echo
 echo "Total: $((PASS+FAIL)) / Pass: $PASS / Fail: $FAIL"
