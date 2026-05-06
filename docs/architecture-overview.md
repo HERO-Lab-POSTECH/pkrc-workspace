@@ -5,9 +5,9 @@ PKRC 수중 3D 재구성 시스템은 표면 플랫폼이 LiDAR로 자기위치�
 ## 데이터 흐름
 
 ```
-[Livox MID360]──┐                      ┌─▶ /fast_lio/odometry
+[Livox MID360]──┐                      ┌─▶ /localization/fast_lio/odometry
                 ├──▶ [fast_lio]────────┤
-[IMU]───────────┘                      └─▶ /fast_lio/cloud_registered_body
+[IMU]───────────┘                      └─▶ /localization/fast_lio/points_body
                                               │
                                               ▼
 [Oculus M750D] ──▶ [oculus_driver] ──▶ /sensor/sonar/oculus/*/image
@@ -15,14 +15,14 @@ PKRC 수중 3D 재구성 시스템은 표면 플랫폼이 LiDAR로 자기위치�
                                               ▼
                                        [3d_mapper_node]
                                               │
-                                              ├─▶ /sonar_3d_mapper/point_cloud
-                                              ├─▶ /sonar_3d_mapper/occupancy_grid
-                                              └─▶ /sonar_3d_mapper/updated_tile_indices
+                                              ├─▶ /perception/sonar_3d/points
+                                              ├─▶ /perception/sonar_3d/markers
+                                              └─▶ /perception/sonar_3d/tile_indices
                                                         │
                                                         ▼
                                                  [robot_detection_node]
                                                         │
-                                                        └─▶ /rov/pose
+                                                        └─▶ /robot_detection/{point_cloud,occupancy_grid}
 ```
 
 [Cartographer]는 별도로 2D occupancy grid를 생산해 표면 위치 보정을 돕습니다.
