@@ -20,3 +20,19 @@ pkrc_make_run_id() {
   local label="${1:?label required}"
   printf '%s_%s\n' "$(date +%Y%m%d_%H%M%S)" "$label"
 }
+
+# pkrc_setup_dirs <bag-id> <run-id>
+# - $PKRC_DATA_DIR/recordings/<bag-id>/{bag, runs/<run-id>} mkdir -p
+# - $PKRC_DATA_DIR/recordings/<bag-id>/runs/latest 심볼릭 링크를 <run-id>로 (재)설정
+# - 다음 변수를 export: PKRC_RECORDING_DIR, PKRC_BAG_DIR, PKRC_RUN_DIR
+pkrc_setup_dirs() {
+  local bag_id="${1:?bag-id required}"
+  local run_id="${2:?run-id required}"
+  local base; base=$(pkrc_data_dir)
+  PKRC_RECORDING_DIR="$base/recordings/$bag_id"
+  PKRC_BAG_DIR="$PKRC_RECORDING_DIR/bag"
+  PKRC_RUN_DIR="$PKRC_RECORDING_DIR/runs/$run_id"
+  export PKRC_RECORDING_DIR PKRC_BAG_DIR PKRC_RUN_DIR
+  mkdir -p "$PKRC_BAG_DIR" "$PKRC_RUN_DIR"
+  ln -sfn "$run_id" "$PKRC_RECORDING_DIR/runs/latest"
+}

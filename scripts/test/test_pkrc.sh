@@ -37,6 +37,38 @@ default_data_dir=$(unset PKRC_DATA_DIR; pkrc_data_dir)
 assert_eq "$default_data_dir" "$HOME/data" "PKRC_DATA_DIR unset → \$HOME/data"
 assert_eq "$(pkrc_data_dir)" "$TEST_ROOT" "PKRC_DATA_DIR set → 그 값"
 
+# ─── Task 2: 디렉토리 셋업 ──────────────────────────────────
+echo "== 디렉토리 셋업 =="
+
+# 첫 호출
+pkrc_setup_dirs "20260506_alpha" "20260506_142233_live"
+[[ -d "$TEST_ROOT/recordings/20260506_alpha/bag" ]] \
+  && pass "bag/ 디렉토리 생성" || fail "bag/ 디렉토리 미생성"
+[[ -d "$TEST_ROOT/recordings/20260506_alpha/runs/20260506_142233_live" ]] \
+  && pass "runs/<run-id>/ 디렉토리 생성" || fail "runs/<run-id>/ 미생성"
+[[ -L "$TEST_ROOT/recordings/20260506_alpha/runs/latest" ]] \
+  && pass "runs/latest 심볼릭 링크 존재" || fail "latest 심볼릭 링크 없음"
+assert_eq "$(readlink "$TEST_ROOT/recordings/20260506_alpha/runs/latest")" \
+          "20260506_142233_live" "latest → 첫 run id"
+
+assert_eq "${PKRC_RECORDING_DIR}" \
+          "$TEST_ROOT/recordings/20260506_alpha" "PKRC_RECORDING_DIR 변수 set"
+assert_eq "${PKRC_BAG_DIR}" \
+          "$TEST_ROOT/recordings/20260506_alpha/bag" "PKRC_BAG_DIR 변수 set"
+assert_eq "${PKRC_RUN_DIR}" \
+          "$TEST_ROOT/recordings/20260506_alpha/runs/20260506_142233_live" "PKRC_RUN_DIR 변수 set"
+
+# 두 번째 호출 (같은 bag-id, 새 run) → latest 갱신
+pkrc_setup_dirs "20260506_alpha" "20260507_093011_replay_voxel0p2"
+assert_eq "$(readlink "$TEST_ROOT/recordings/20260506_alpha/runs/latest")" \
+          "20260507_093011_replay_voxel0p2" "latest → 새 run으로 재지정"
+[[ -d "$TEST_ROOT/recordings/20260506_alpha/runs/20260506_142233_live" ]] \
+  && pass "이전 run 디렉토리 보존됨" || fail "이전 run 디렉토리 사라짐"
+
+# 멱등성: 같은 인자 두 번 호출 시 에러 없음
+pkrc_setup_dirs "20260506_alpha" "20260507_093011_replay_voxel0p2" \
+  && pass "멱등 호출 OK" || fail "멱등 호출 실패"
+
 # ─── 결과 ────────────────────────────────────────────────────
 echo
 echo "Total: $((PASS+FAIL)) / Pass: $PASS / Fail: $FAIL"
