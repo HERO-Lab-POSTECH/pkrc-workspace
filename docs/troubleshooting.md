@@ -66,6 +66,48 @@ source ~/.bashrc
 
 상세: [QoS 정책](https://github.com/HERO-Lab-POSTECH/sonar_3d_reconstruction/blob/main/docs/source/reference/qos-policy.md)
 
+### 원격 RViz에서 포인트클라우드가 나왔다 안 나왔다 함
+
+QoS가 아니라 **링크 대역폭 포화**일 가능성이 높습니다. QoS mismatch는 보통 전무(아예 안 옴)로
+나타나고, "간헐적"은 거의 항상 대역폭입니다.
+
+진단 순서 — 위에서부터 하나씩:
+
+```bash
+# 1. 링크 속도. 100이면 여기서 끝
+cat /sys/class/net/<iface>/speed
+
+# 2. IP fragment 재조립 성공률 (누적값 말고 델타를 봐야 함)
+netstat -s | grep -iE "reassembl" > /tmp/n1; sleep 5
+netstat -s | grep -iE "reassembl" > /tmp/n2; diff /tmp/n1 /tmp/n2
+#   required 대비 "reassembled ok" 비율이 낮으면 fragment 유실
+
+# 3. 실제 수신 여부
+ros2 topic bw /slam/fast_lio/points_body   # 메시지 0건이면 확정
+
+# 4. 포화 방증 — 로컬 유선 RTT가 1ms를 크게 넘으면 큐가 차 있는 것
+ping -c 4 <상대 IP>
+```
+
+**왜 조금만 넘쳐도 전부 깨지나**: `points_body`는 `feats_undistort` 원본 전체를 발행합니다
+(`fast_lio/src/slam/laserMapping.cpp:616`). `dense_publish_en`은 이 경로에 적용되지 않고
+`point_filter_num`만 걸립니다. PCL `PointXYZINormal`은 포인트당 **48 바이트**(xyz 패딩 16 +
+normal 16 + intensity/curvature 16)라, MID-360 10Hz 기준 메시지 하나가 수백 KB입니다.
+이게 UDP fragment 수백 개로 쪼개져 한 번에 쏟아지는데, 센서 QoS는 `BEST_EFFORT`라 재전송이
+없습니다. **fragment 하나만 잃어도 메시지 전체가 폐기**되므로 링크가 살짝 포화되어도
+수신 성공률이 급락합니다.
+
+해결은 대역폭을 늘리거나 데이터를 줄이는 것 둘 중 하나입니다.
+
+| 방법 | 비용 | 비고 |
+|:---|:---|:---|
+| 기가비트 포트/케이블로 교체 | 코드 0줄 | USB 2.0 이더넷 동글은 100Mbps인 경우가 많음 |
+| `point_filter_num` 상향 (`config/slam/mid360.yaml`) | 설정 1줄 | SLAM 입력 자체가 줄어드니 매핑 품질 영향 확인 필요 |
+| RViz를 발행 측 머신에서 실행 | 0 | 네트워크 회피. X 포워딩이면 그것대로 느림 |
+
+측정 사례와 2026-07-29 시점 blueboat 구성별 수치는
+[원격 RViz 대역폭 진단](remote-rviz-bandwidth.md) 참조.
+
 ### 시리얼 디바이스 권한 거부 (`/dev/ttyUSB0: Permission denied`)
 
 ```bash
