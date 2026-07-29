@@ -15,3 +15,7 @@ repositories:
     type: git
     url: https://github.com/HERO-Lab-POSTECH/pkrc_visualizer.git
     version: main
+  pkrc_vehicle_control:
+    type: git
+    url: https://github.com/HERO-Lab-POSTECH/pkrc-vehicle-control.git
+    version: main
